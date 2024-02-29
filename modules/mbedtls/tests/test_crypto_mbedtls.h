@@ -78,18 +78,15 @@ TEST_CASE("[Crypto] CryptoKey save") {
 	crypto_key_save_test(in_pub_path, out_pub_path, true);
 }
 
-// TEST_CASE("[Crypto] CryptoKey save public") {
-// 	const Ref<CryptoKey> crypto_key = create_crypto_key();
-// 	const String pub_out_path = TestUtils::get_data_path("crypto/out.pub");
-// 	crypto_key->save(pub_out_path, true);
-// 	const String pub_path = TestUtils::get_data_path("crypto/in.pub");
-// 	Ref<FileAccess> f_pub_out = FileAccess::open(pub_out_path, FileAccess::READ);
-// 	REQUIRE(!f_pub_out.is_null());
-// 	String s_pub_out = f_pub_out->get_as_utf8_string();
-// 	Ref<FileAccess> f_pub_in = FileAccess::open(pub_path, FileAccess::READ);
-// 	String s_pub_in = f_pub_in->get_as_utf8_string();
-// 	CHECK(s_pub_out == s_pub_in);
-// }
+void crypto_key_save_public_only_test(String in_priv_path, String in_pub_path, String out_path);
+
+TEST_CASE("[Crypto] CryptoKey save public_only") {
+	const String in_priv_path = TestUtils::get_data_path("crypto/in.key");
+	const String in_pub_path = TestUtils::get_data_path("crypto/in.pub");
+	const String out_path = TestUtils::get_data_path("crypto/out_public_only.pub");
+	crypto_key_save_public_only_test(in_priv_path, in_pub_path, out_path);
+}
+
 } // namespace TestCryptoMbedTLS
 
 #endif // TEST_CRYPTO_MBEDTLS_H

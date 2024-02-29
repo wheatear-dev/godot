@@ -68,6 +68,18 @@ Ref<CryptoKey> create_crypto_key(String key_path, bool public_only) {
 	return crypto_key;
 }
 
+String read_file_s(String file_path) {
+	Ref<FileAccess> file_access = FileAccess::open(file_path, FileAccess::READ);
+	REQUIRE(file_access.is_valid());
+	return file_access->get_as_utf8_string();
+}
+
+bool files_equal(String in_path, String out_path) {
+	const String s_in = read_file_s(in_path);
+	const String s_out = read_file_s(out_path);
+	return s_in == s_out;
+}
+
 void crypto_key_public_only_test(String key_path, bool public_only) {
 	Ref<CryptoKey> crypto_key = create_crypto_key(key_path, public_only);
 	bool is_equal = crypto_key->is_public_only() == public_only;
@@ -77,12 +89,14 @@ void crypto_key_public_only_test(String key_path, bool public_only) {
 void crypto_key_save_test(String in_path, String out_path, bool public_only) {
 	Ref<CryptoKey> crypto_key = create_crypto_key(in_path, public_only);
 	crypto_key->save(out_path, public_only);
-	Ref<FileAccess> f_out = FileAccess::open(out_path, FileAccess::READ);
-	REQUIRE(f_out.is_valid());
-	String s_out = f_out->get_as_utf8_string();
-	Ref<FileAccess> f_in = FileAccess::open(in_path, FileAccess::READ);
-	REQUIRE(f_in.is_valid());
-	String s_in = f_in->get_as_utf8_string();
-	CHECK(s_out == s_in);
+	bool is_equal = files_equal(in_path, out_path);
+	CHECK(is_equal);
+}
+
+void crypto_key_save_public_only_test(String in_priv_path, String in_pub_path, String out_path) {
+	Ref<CryptoKey> crypto_key = create_crypto_key(in_priv_path, false);
+	crypto_key->save(out_path, true);
+	bool is_equal = files_equal(in_pub_path, out_path);
+	CHECK(is_equal);
 }
 } // namespace TestCryptoMbedTLS

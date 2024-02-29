@@ -33,6 +33,7 @@
 #include "../crypto_mbedtls.h"
 
 #include "tests/test_macros.h"
+#include "tests/test_utils.h"
 
 namespace TestCryptoMbedTLS {
 
@@ -60,4 +61,17 @@ void hmac_context_digest_test(HashingContext::HashType ht, String expected_hex) 
 	String hex = String::hex_encode_buffer(digest.ptr(), digest.size());
 	CHECK(hex == expected_hex);
 }
+
+Ref<CryptoKey> create_crypto_key(String key_path, bool public_only) {
+	Ref<CryptoKey> crypto_key = Ref<CryptoKey>(CryptoKey::create());;
+	crypto_key->load(key_path, public_only);
+	return crypto_key;
+}
+
+void crypto_key_public_only_test(String key_path, bool public_only) {
+	Ref<CryptoKey> crypto_key = create_crypto_key(key_path, public_only);
+	bool is_equal = crypto_key->is_public_only() == public_only;
+	CHECK(is_equal);
+}
+
 } // namespace TestCryptoMbedTLS

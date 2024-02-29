@@ -61,28 +61,22 @@ TEST_CASE("[HMACContext] HMAC digest") {
 
 void crypto_key_public_only_test(String key_path, bool public_only);
 
-TEST_CASE("[Crypto] CryptoKey private public_only") {
-	const String priv_key_path = TestUtils::get_data_path("crypto/in.key");
-	crypto_key_public_only_test(priv_key_path, false);
+TEST_CASE("[Crypto] CryptoKey is_public_only") {
+	crypto_key_public_only_test(TestUtils::get_data_path("crypto/in.key"), false);
+	crypto_key_public_only_test(TestUtils::get_data_path("crypto/in.pub"), true);
 }
 
-TEST_CASE("[Crypto] CryptoKey public public_only") {
-	const String pub_key_path = TestUtils::get_data_path("crypto/in.pub");
-	crypto_key_public_only_test(pub_key_path, true);
-}
+void crypto_key_save_test(String in_path, String out_path, bool public_only);
 
-// TEST_CASE("[Crypto] CryptoKey save private") {
-// 	const Ref<CryptoKey> crypto_key = create_crypto_key();
-// 	const String priv_out_path = TestUtils::get_data_path("crypto/out.key");
-// 	crypto_key->save(priv_out_path);
-// 	const String priv_path = TestUtils::get_data_path("crypto/in.key");
-// 	Ref<FileAccess> f_priv_out = FileAccess::open(priv_out_path, FileAccess::READ);
-// 	REQUIRE(!f_priv_out.is_null());
-// 	String s_priv_out = f_priv_out->get_as_utf8_string();
-// 	Ref<FileAccess> f_priv_in = FileAccess::open(priv_path, FileAccess::READ);
-// 	String s_priv_in = f_priv_in->get_as_utf8_string();
-// 	CHECK(s_priv_out == s_priv_in);
-// }
+TEST_CASE("[Crypto] CryptoKey save") {
+	const String in_priv_path = TestUtils::get_data_path("crypto/in.key");
+	const String out_priv_path = TestUtils::get_data_path("crypto/out.key");
+	crypto_key_save_test(in_priv_path, out_priv_path, false);
+
+	const String in_pub_path = TestUtils::get_data_path("crypto/in.pub");
+	const String out_pub_path = TestUtils::get_data_path("crypto/out.pub");
+	crypto_key_save_test(in_pub_path, out_pub_path, true);
+}
 
 // TEST_CASE("[Crypto] CryptoKey save public") {
 // 	const Ref<CryptoKey> crypto_key = create_crypto_key();

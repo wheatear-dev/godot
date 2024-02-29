@@ -74,4 +74,13 @@ void crypto_key_public_only_test(String key_path, bool public_only) {
 	CHECK(is_equal);
 }
 
+void crypto_key_save_test(String in_path, String out_path, bool public_only) {
+	Ref<CryptoKey> crypto_key = create_crypto_key(in_path, public_only);
+	crypto_key->save(out_path, public_only);
+	Ref<FileAccess> f_out = FileAccess::open(out_path, FileAccess::READ);
+	String s_out = f_out->get_as_utf8_string();
+	Ref<FileAccess> f_in = FileAccess::open(in_path, FileAccess::READ);
+	String s_in = f_in->get_as_utf8_string();
+	CHECK(s_out == s_in);
+}
 } // namespace TestCryptoMbedTLS

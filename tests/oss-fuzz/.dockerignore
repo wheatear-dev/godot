@@ -1,0 +1,9 @@
+# Godot OSS-Fuzz .dockerignore config
+#
+# This is copied into the root
+
+#####################
+### Miscellaneous ###
+#####################
+
+.git

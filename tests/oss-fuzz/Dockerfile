@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /godot
 
-RUN git clone --depth=1 --branch=4.3 https://github.com/godotengine/godot.git .
+RUN git clone --depth=1 --branch=oss-fuzz https://github.com/wheatear-dev/godot.git .
 
 RUN --mount=type=cache,target=/root/.scons \
     --mount=type=cache,target=/ccache \

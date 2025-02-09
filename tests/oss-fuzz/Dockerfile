@@ -1,3 +1,4 @@
+# syntax=docker.io/docker/dockerfile:1.7-labs
 FROM debian:stable AS builder
 
 ENV BUILDKIT_INLINE_CACHE=1
@@ -5,6 +6,7 @@ ENV BUILDKIT_INLINE_CACHE=1
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
+    clang \
     scons \
     pkg-config \
     libx11-dev \
@@ -22,15 +24,15 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /godot
 
-COPY . .
+COPY --exclude=.git --exclude=*.o . .
 
 RUN --mount=type=cache,target=/root/.scons \
     --mount=type=cache,target=/ccache \
-    scons platform=linuxbsd target=editor -j$(nproc) use_ccache=yes
+    scons platform=linuxbsd use_llvm=yes target=editor fuzz=yes -j$(nproc) use_ccache=yes
 
 
 FROM debian:stable
 
-COPY --from=builder /godot/bin/godot.linuxbsd.editor.x86_64 /usr/local/bin/godot
+COPY --from=builder /godot/bin/godot.linuxbsd.editor.fuzz.x86_64 /usr/local/bin/godot
 
 CMD ["godot"]

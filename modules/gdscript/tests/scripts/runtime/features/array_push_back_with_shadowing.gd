@@ -1,6 +1,6 @@
 extends RefCounted
 
-## Shadows builtin class `Key`
+## Shadows builtin enum `Key`
 class Key extends RefCounted:
     pass
 

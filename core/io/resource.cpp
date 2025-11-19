@@ -37,6 +37,8 @@
 #include "core/variant/container_type_validate.h"
 #include "scene/main/node.h" //only so casting works
 
+thread_local bool thread_duplicate_owns_cache = false;
+
 void Resource::emit_changed() {
 	if (emit_changed_state != EMIT_CHANGED_UNBLOCKED) {
 		emit_changed_state = EMIT_CHANGED_BLOCKED_PENDING_EMIT;
@@ -434,7 +436,9 @@ Ref<Resource> Resource::duplicate_for_local_scene(Node *p_for_scene, DuplicateRe
 #endif
 
 	DuplicateRemapCacheT *remap_cache_backup = thread_duplicate_remap_cache;
+	bool owns_cache_backup = thread_duplicate_owns_cache;
 	thread_duplicate_remap_cache = &p_remap_cache;
+	thread_duplicate_owns_cache = false;
 
 	DuplicateParams params;
 	params.deep = true;
@@ -442,6 +446,7 @@ Ref<Resource> Resource::duplicate_for_local_scene(Node *p_for_scene, DuplicateRe
 	const Ref<Resource> &dupe = _duplicate(params);
 
 	thread_duplicate_remap_cache = remap_cache_backup;
+	thread_duplicate_owns_cache = owns_cache_backup;
 
 	return dupe;
 }
@@ -504,6 +509,7 @@ Ref<Resource> Resource::duplicate(bool p_deep) const {
 	bool started_session = false;
 	if (!thread_duplicate_remap_cache) {
 		thread_duplicate_remap_cache = &remap_cache;
+		thread_duplicate_owns_cache = false;
 		started_session = true;
 	}
 
@@ -514,6 +520,7 @@ Ref<Resource> Resource::duplicate(bool p_deep) const {
 
 	if (started_session) {
 		thread_duplicate_remap_cache = nullptr;
+		thread_duplicate_owns_cache = false;
 	}
 
 	return dupe;
@@ -526,6 +533,7 @@ Ref<Resource> Resource::duplicate_deep(ResourceDeepDuplicateMode p_deep_subresou
 	bool started_session = false;
 	if (!thread_duplicate_remap_cache) {
 		thread_duplicate_remap_cache = &remap_cache;
+		thread_duplicate_owns_cache = false;
 		started_session = true;
 	}
 
@@ -536,6 +544,7 @@ Ref<Resource> Resource::duplicate_deep(ResourceDeepDuplicateMode p_deep_subresou
 
 	if (started_session) {
 		thread_duplicate_remap_cache = nullptr;
+		thread_duplicate_owns_cache = false;
 	}
 
 	return dupe;
@@ -571,6 +580,7 @@ Ref<Resource> Resource::_duplicate_from_variant(bool p_deep, ResourceDeepDuplica
 		}
 	} else {
 		thread_duplicate_remap_cache = memnew(DuplicateRemapCacheT);
+		thread_duplicate_owns_cache = true;
 	}
 
 	DuplicateParams params;
@@ -583,10 +593,11 @@ Ref<Resource> Resource::_duplicate_from_variant(bool p_deep, ResourceDeepDuplica
 }
 
 void Resource::_teardown_duplicate_from_variant() {
-	if (thread_duplicate_remap_cache) {
+	if (thread_duplicate_owns_cache) {
 		memdelete(thread_duplicate_remap_cache);
-		thread_duplicate_remap_cache = nullptr;
 	}
+	thread_duplicate_remap_cache = nullptr;
+	thread_duplicate_owns_cache = false;
 }
 
 void Resource::_set_path(const String &p_path) {

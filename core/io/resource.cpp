@@ -593,11 +593,11 @@ Ref<Resource> Resource::_duplicate_from_variant(bool p_deep, ResourceDeepDuplica
 }
 
 void Resource::_teardown_duplicate_from_variant() {
-	if (thread_duplicate_owns_cache) {
+	if (thread_duplicate_remap_cache && thread_duplicate_owns_cache) {
 		memdelete(thread_duplicate_remap_cache);
+		thread_duplicate_remap_cache = nullptr;
+		thread_duplicate_owns_cache = false;
 	}
-	thread_duplicate_remap_cache = nullptr;
-	thread_duplicate_owns_cache = false;
 }
 
 void Resource::_set_path(const String &p_path) {

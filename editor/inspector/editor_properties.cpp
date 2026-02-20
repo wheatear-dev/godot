@@ -3589,6 +3589,7 @@ void EditorPropertyResource::setup(Object *p_object, const String &p_path, const
 
 void EditorPropertyResource::update_property() {
 	Ref<Resource> res = get_edited_property_display_value();
+	bool should_open_editor = false;
 
 	if (use_sub_inspector) {
 		if (res.is_valid() != resource_picker->is_toggle_mode()) {
@@ -3635,8 +3636,7 @@ void EditorPropertyResource::update_property() {
 				}
 
 				if (!editor_list.is_empty()) {
-					// Open editor directly.
-					_open_editor_pressed();
+					should_open_editor = true;
 					opened_editor = true;
 				}
 			}
@@ -3663,6 +3663,10 @@ void EditorPropertyResource::update_property() {
 	resource_picker->set_edited_resource_no_check(res);
 	const Ref<Resource> &real_res = get_edited_property_value();
 	resource_picker->set_force_allow_unique(real_res.is_null() && res.is_valid());
+
+	if (should_open_editor) {
+		_open_editor_pressed();
+	}
 }
 
 void EditorPropertyResource::collapse_all_folding() {

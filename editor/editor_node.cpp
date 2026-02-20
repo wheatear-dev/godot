@@ -3045,6 +3045,18 @@ void EditorNode::hide_unused_editors(const Object *p_editing_owner) {
 	}
 }
 
+bool EditorNode::is_plugin_active(EditorPlugin *p_plugin, const Object *p_exclude_owner) const {
+	for (const KeyValue<ObjectID, HashSet<EditorPlugin *>> &kv : active_plugins) {
+		if (p_exclude_owner && kv.key == p_exclude_owner->get_instance_id()) {
+			continue;
+		}
+		if (kv.value.has(p_plugin)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void EditorNode::_add_to_history(const Object *p_object, const String &p_property, bool p_inspector_only) {
 	ObjectID id = p_object->get_instance_id();
 	ObjectID history_id = editor_history.get_current();

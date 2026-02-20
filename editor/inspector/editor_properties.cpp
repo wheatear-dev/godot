@@ -3589,6 +3589,7 @@ void EditorPropertyResource::setup(Object *p_object, const String &p_path, const
 
 void EditorPropertyResource::update_property() {
 	Ref<Resource> res = get_edited_property_display_value();
+	bool should_open_editor = false;
 
 	if (use_sub_inspector) {
 		if (res.is_valid() != resource_picker->is_toggle_mode()) {
@@ -3625,6 +3626,29 @@ void EditorPropertyResource::update_property() {
 				set_bottom_editor(sub_inspector);
 
 				resource_picker->set_toggle_pressed(true);
+
+				Array editor_list;
+				for (int i = 0; i < EditorNode::get_editor_data().get_editor_plugin_count(); i++) {
+					EditorPlugin *ep = EditorNode::get_editor_data().get_editor_plugin(i);
+					if (ep->handles(res.ptr())) {
+						editor_list.push_back(ep);
+					}
+				}
+
+				if (!editor_list.is_empty()) {
+					bool any_new_plugin = false;
+					for (int i = 0; i < editor_list.size(); i++) {
+						EditorPlugin *ep = Object::cast_to<EditorPlugin>(editor_list[i]);
+						if (!EditorNode::get_singleton()->is_plugin_active(ep, this)) {
+							any_new_plugin = true;
+							break;
+						}
+					}
+					if (any_new_plugin) {
+						should_open_editor = true;
+						opened_editor = true;
+					}
+				}
 			}
 
 			sub_inspector->set_read_only(is_checkable() && !is_checked());
@@ -3649,6 +3673,10 @@ void EditorPropertyResource::update_property() {
 	resource_picker->set_edited_resource_no_check(res);
 	const Ref<Resource> &real_res = get_edited_property_value();
 	resource_picker->set_force_allow_unique(real_res.is_null() && res.is_valid());
+
+	if (should_open_editor) {
+		_open_editor_pressed();
+	}
 }
 
 void EditorPropertyResource::collapse_all_folding() {

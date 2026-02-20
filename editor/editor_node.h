@@ -840,6 +840,7 @@ public:
 	void edit_item(Object *p_object, Object *p_editing_owner);
 	void push_node_item(Node *p_node);
 	void hide_unused_editors(const Object *p_editing_owner = nullptr);
+	bool is_plugin_active(EditorPlugin *p_plugin, const Object *p_exclude_owner = nullptr) const;
 
 	void replace_resources_in_object(
 			Object *p_object,
